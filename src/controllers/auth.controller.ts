@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import User from "../models/users.model";
 import { logger } from "../libraries/Logger.library";
 import { sendEmail } from "../utils/sendEmail.util";
+import { generateAccessToken } from "../utils/token.util";
+import Token from "../models/token.model";
 
 export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
@@ -67,9 +69,64 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         message: "Password invalid",
       });
     }
-    return res
-      .status(200)
-      .json({ success: true, data: { user }, message: "Login successfully" });
+    if (user.token == null || user.token == undefined) {
+      const { accessToken, refreshToken } = await generateAccessToken(
+        user.id,
+        user.role
+      );
+      const createToken = await Token.create({ accessToken, refreshToken });
+      Object.assign(user, { token: createToken._id });
+    }
+    const x = await (await user.save()).populate("token");
+    return res.status(200).json({
+      success: true,
+      data: { user: x },
+      message: "Login successfully",
+    });
+  } catch (error: any) {
+    logger.error(error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const accountVerification = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const findUser = await User.findOne({ id: req.params.token }).select(
+      "id username email valid"
+    );
+    if (!findUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (findUser?.valid === true) {
+      return res.status(400).json({
+        success: false,
+        message: "the user has been validated previously",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.token,
+      {
+        $set: {
+          valid: true,
+        },
+        $unset: {
+          expiredAt: 1,
+        },
+      },
+      { new: true }
+    ).select("id username email valid");
+    return res.status(200).json({
+      success: true,
+      data: { user },
+      message: "user has been validated",
+    });
   } catch (error: any) {
     logger.error(error.message);
     return res.status(500).json({ success: false, message: error.message });

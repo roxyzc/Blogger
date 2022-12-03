@@ -1,5 +1,6 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema, Document, PopulatedDoc, ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
+import { ITokenModel } from "./token.model";
 
 export interface IUser {
   username: String;
@@ -7,6 +8,7 @@ export interface IUser {
   password: String;
   role: String;
   valid: Boolean;
+  token?: PopulatedDoc<Document<ObjectId> & ITokenModel>;
   createdAt: Date;
   updatedAt: Date;
   expiredAt?: Date;
@@ -49,6 +51,10 @@ const UserSchema: Schema = new Schema(
       type: Boolean,
       default: false,
     },
+    token: {
+      type: Schema.Types.ObjectId,
+      ref: "Token",
+    },
     expiredAt: {
       type: Date,
       expires: 3600,
@@ -81,4 +87,4 @@ UserSchema.methods.comparePassword = async function (
     .catch(() => false);
 };
 
-export default model<IUserModel>("User", UserSchema, "test");
+export default model<IUserModel>("User", UserSchema);

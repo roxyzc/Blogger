@@ -57,5 +57,24 @@ export const schema = {
           "any.only": "{{#label}} does not match",
         }),
     }),
+    login: joi.object({
+      email: joi.string().email().label("Email").required().messages({
+        "string.email": `'{{#label}}' in Email must be a valid {{#label}}`,
+        "string.empty": `{{#label}} cannot be an empty field`,
+        "any.required": `{{#label}} is a required field`,
+      }),
+      password: joi
+        .string()
+        .min(8)
+        .max(30)
+        .label("Password")
+        .required()
+        .messages({
+          "string.empty": `{{#label}} cannot be an empty field`,
+          "string.min": `{{#label}} should have a minimum length of {#limit}`,
+          "string.max": `{{#label}} must be less than or equal to {#limit}`,
+          "any.required": `{{#label}} is a required field`,
+        }),
+    }),
   },
 };

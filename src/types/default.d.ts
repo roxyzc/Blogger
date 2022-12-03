@@ -7,6 +7,13 @@ declare global {
       SALT: number;
       NODE_ENV: string;
       MONGODB_URL: string;
+      ACCESSTOKENSECRET: string;
+      REFRESHTOKENSECRET: string;
+      USER: string;
+      PASS: string;
+      USERNAME_ADMIN: string;
+      PASSWORD_ADMIN: string;
+      EMAIL_ADMIN: string;
     }
   }
 }

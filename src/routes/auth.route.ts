@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { register } from "../controllers/auth.controller";
+import {
+  login,
+  register,
+  accountVerification,
+} from "../controllers/auth.controller";
 import {
   validateSchema,
   schema,
@@ -12,5 +16,8 @@ route.post(
   validateSchema(schema.Auth.register),
   register
 );
+
+route.post("/api/auth/login", validateSchema(schema.Auth.login), login);
+route.get("/api/v-user/:token", accountVerification);
 
 export default route;

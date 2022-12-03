@@ -1,0 +1,17 @@
+import jwt from "jsonwebtoken";
+// import "dotenv/config";
+
+export const generateAccessToken = async (id: String, role: String) => {
+  const accessToken = jwt.sign(
+    { role, id },
+    process.env.ACCESSTOKENSECRET as string,
+    { expiresIn: "15m" }
+  );
+  const refreshToken = jwt.sign(
+    { role, id },
+    process.env.REFRESHTOKENSECRET as string,
+    { expiresIn: "30m" }
+  );
+
+  return Promise.resolve({ accessToken, refreshToken });
+};
