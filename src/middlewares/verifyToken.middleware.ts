@@ -66,3 +66,31 @@ export const verifyTokenAdmin = (
     throw new Error(error);
   }
 };
+
+export const checkExpired = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader)
+      return res.status(401).json({ success: false, message: "Invalid token" });
+    const token = authHeader?.split(" ")[1];
+    jwt.verify(
+      token as string,
+      process.env.ACCESSTOKENSECRET as string,
+      async (err: any, _decoded: any): Promise<any> => {
+        if (!err)
+          return res
+            .status(403)
+            .json({ success: false, message: "Your token has not expired" });
+        req.user.token = token;
+        next();
+      }
+    );
+  } catch (error: any) {
+    logger.error(error);
+    throw new Error(error);
+  }
+};

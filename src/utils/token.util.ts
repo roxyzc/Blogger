@@ -15,3 +15,12 @@ export const generateAccessToken = async (id: String, role: String) => {
 
   return Promise.resolve({ accessToken, refreshToken });
 };
+
+export const refreshToken = (id: string, role: string) => {
+  const accessToken = jwt.sign(
+    { id, role },
+    process.env.ACCESSTOKENSECRET as string,
+    { expiresIn: "5m" }
+  );
+  return Promise.resolve({ accessToken });
+};
