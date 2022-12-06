@@ -8,6 +8,7 @@ export interface IUser {
   password: String;
   role: String;
   valid: Boolean;
+  image?: String;
   token?: PopulatedDoc<Document<ObjectId> & ITokenModel>;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +40,7 @@ const UserSchema: Schema = new Schema(
     role: {
       enum: ["admin", "user"],
       type: String,
+      required: true,
       default: function (this: IUser) {
         return this.username === process.env.USERNAME_ADMIN &&
           this.password === process.env.PASSWORD_ADMIN &&
@@ -47,8 +49,14 @@ const UserSchema: Schema = new Schema(
           : "user";
       },
     },
+    image: {
+      type: String,
+      default: undefined,
+      required: false,
+    },
     valid: {
       type: Boolean,
+      required: true,
       default: false,
     },
     token: {

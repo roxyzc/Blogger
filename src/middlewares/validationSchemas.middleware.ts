@@ -77,4 +77,13 @@ export const schema = {
         }),
     }),
   },
+  User: {
+    forgotThePassword: joi.object({
+      email: joi.string().email().label("Email").required().messages({
+        "string.email": `'{{#label}}' in Email must be a valid {{#label}}`,
+        "string.empty": `{{#label}} cannot be an empty field`,
+        "any.required": `{{#label}} is a required field`,
+      }),
+    }),
+  },
 };

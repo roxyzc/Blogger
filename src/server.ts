@@ -5,6 +5,8 @@ import morgan from "morgan";
 import { connectToDatabase } from "./config/connectToDatabase.config";
 import { notFound, errorHandler } from "./middlewares/errorHandlers.middleware";
 import AuthRoute from "./routes/auth.route";
+import TokenRoute from "./routes/token.route";
+import UserRoute from "./routes/user.route";
 import "dotenv/config";
 
 const app: Application = express();
@@ -18,6 +20,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(helmet());
 app.use(AuthRoute);
+app.use(UserRoute);
+app.use(TokenRoute);
 app.use(notFound);
 app.use(errorHandler);
 

@@ -10,7 +10,9 @@ export const verifyToken = async (
   try {
     const authHeader = req.headers["authorization"];
     if (!authHeader)
-      return res.status(401).json({ success: false, message: "Invalid token" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Please enter the token" });
     const token = authHeader?.split(" ")[1];
     jwt.verify(
       token as string,
@@ -21,6 +23,7 @@ export const verifyToken = async (
             .status(403)
             .json({ success: false, message: "Invalid token" });
         req.user = decoded;
+        console.log(req.user);
         next();
       }
     );
@@ -85,7 +88,7 @@ export const checkExpired = async (
           return res
             .status(403)
             .json({ success: false, message: "Your token has not expired" });
-        req.user.token = token;
+        req.user = token;
         next();
       }
     );

@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
 import { Request } from "express";
 
-export const sendEmail = (req: Request, user: any): Promise<Boolean> => {
-  const transporter = nodemailer.createTransport({
+const transporter = () => {
+  return nodemailer.createTransport({
     service: "gmail",
     auth: {
       user: process.env.USER,
@@ -12,7 +12,9 @@ export const sendEmail = (req: Request, user: any): Promise<Boolean> => {
       rejectUnauthorized: false,
     },
   });
+};
 
+export const sendEmail = (req: Request, user: any): Promise<Boolean> => {
   let mailOptions = {
     from: `"Verify your email"<${process.env.USER}>`,
     to: user.email,
@@ -28,7 +30,23 @@ export const sendEmail = (req: Request, user: any): Promise<Boolean> => {
   };
 
   try {
-    transporter.sendMail(mailOptions);
+    transporter().sendMail(mailOptions);
+    return Promise.resolve(true);
+  } catch (error: any) {
+    return Promise.resolve(false);
+  }
+};
+
+export const sendOTPWithEmail = (otp: any): Promise<Boolean> => {
+  let mailOptions = {
+    from: `"OTP"<${process.env.USER}>`,
+    to: otp.email,
+    subject: "roxyzc -OTP<five minute expiration>",
+    html: `<h1 style="text-align: center;">${otp.OTP}</h1>`,
+  };
+
+  try {
+    transporter().sendMail(mailOptions);
     return Promise.resolve(true);
   } catch (error: any) {
     return Promise.resolve(false);

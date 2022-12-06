@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import User from "../models/users.model";
+import Token from "../models/token.model";
 import { logger } from "../libraries/Logger.library";
 import { sendEmail } from "../utils/sendEmail.util";
 import { generateAccessToken } from "../utils/token.util";
-import Token from "../models/token.model";
 
 export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
@@ -32,7 +32,7 @@ export const register = async (req: Request, res: Response) => {
       if (!valid) {
         (await session).abortTransaction();
         return res
-          .status(400)
+          .status(500)
           .json({ success: false, message: "failed to send email" });
       }
       return res
@@ -94,7 +94,8 @@ export const accountVerification = async (
   res: Response
 ): Promise<any> => {
   try {
-    const findUser = await User.findOne({ id: req.params.token }).select(
+    console.log(req.params.token);
+    const findUser = await User.findById(req.params.token).select(
       "id username email valid"
     );
     if (!findUser) {
@@ -103,6 +104,7 @@ export const accountVerification = async (
         .json({ success: false, message: "User not found" });
     }
 
+    console.log(findUser);
     if (findUser?.valid === true) {
       return res.status(400).json({
         success: false,
@@ -127,6 +129,22 @@ export const accountVerification = async (
       data: { user },
       message: "user has been validated",
     });
+  } catch (error: any) {
+    logger.error(error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const logout = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(200).json({ success: true, message: "Logout" });
+    }
+    await Token.findByIdAndDelete(user.token);
+    user.token = undefined;
+    user.save();
+    return res.status(200).json({ success: true, message: "Logout" });
   } catch (error: any) {
     logger.error(error.message);
     return res.status(500).json({ success: false, message: error.message });
