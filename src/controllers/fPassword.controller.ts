@@ -18,7 +18,9 @@ export const forgotThePassword = async (
         return res
           .status(404)
           .json({ success: false, message: "unregistered email" });
-
+      const findOTP = await OTP.findOne({ email });
+      if (findOTP)
+        return res.status(400).json({ success: false, message: "OTP exist" });
       const otp = await OTP.create({ email, OTP: generateOTP() });
       const valid = await sendOTPWithEmail(otp);
       if (!valid) {
