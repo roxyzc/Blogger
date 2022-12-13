@@ -37,12 +37,15 @@ export const sendEmail = (req: Request, user: any): Promise<Boolean> => {
   }
 };
 
-export const sendOTPWithEmail = (otp: any): Promise<Boolean> => {
+export const sendOTPWithEmail = (
+  email: string,
+  otp: string
+): Promise<Boolean> => {
   let mailOptions = {
     from: `"OTP"<${process.env.USER}>`,
-    to: otp.email,
+    to: email,
     subject: "roxyzc -OTP<five minute expiration>",
-    html: `<h1 style="text-align: center; margin: auto;">${otp.OTP}</h1>`,
+    html: `<h1 style="text-align: center; margin: auto;">${otp}</h1>`,
   };
 
   try {

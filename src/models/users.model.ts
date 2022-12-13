@@ -41,13 +41,7 @@ const UserSchema: Schema = new Schema(
       enum: ["admin", "user"],
       type: String,
       required: true,
-      default: function (this: IUser) {
-        return this.username === process.env.USERNAME_ADMIN &&
-          this.password === process.env.PASSWORD_ADMIN &&
-          this.email === process.env.EMAIL_ADMIN
-          ? "admin"
-          : "user";
-      },
+      default: "user",
     },
     image: {
       type: String,

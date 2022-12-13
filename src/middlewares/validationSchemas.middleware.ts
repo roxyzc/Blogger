@@ -85,5 +85,35 @@ export const schema = {
         "any.required": `{{#label}} is a required field`,
       }),
     }),
+    verifyOTP: joi.object({
+      otp: joi.string().min(8).max(8).label("otp").required().messages({
+        "string.empty": `{{#label}} cannot be an empty field`,
+        "string.min": `{{#label}} should be {#limit}`,
+        "string.max": `{{#label}} should be {#limit}`,
+        "any.required": `{{#label}} is a required field`,
+      }),
+    }),
+    vChangePassword: joi.object({
+      password: joi
+        .string()
+        .min(8)
+        .max(30)
+        .label("Password")
+        .required()
+        .messages({
+          "string.empty": `{{#label}} cannot be an empty field`,
+          "string.min": `{{#label}} should have a minimum length of {#limit}`,
+          "string.max": `{{#label}} must be less than or equal to {#limit}`,
+          "any.required": `{{#label}} is a required field`,
+        }),
+      confirmPassword: joi
+        .any()
+        .equal(joi.ref("password"))
+        .required()
+        .label("Confirm password")
+        .messages({
+          "any.only": "{{#label}} does not match",
+        }),
+    }),
   },
 };

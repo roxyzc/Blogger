@@ -1,7 +1,15 @@
 {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.bracketPairColorization.enabled": true,
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
-    "editor.wordWrap": "on"
-  }
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.wordWrap": "on",
+  "http.proxyStrictSSL": false
+  // "json.schemas": [
+  //   {
+  //     "fileMatch": ["/package.json"],
+  //     "url": "https://json.schemastore.org/package",
+  //     "schema": true
+  //   }
+  // ]
+}

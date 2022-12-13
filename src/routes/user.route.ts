@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { findAllUserAndQuery } from "../controllers/user.controller";
 import {
-  changePassword,
+  vChangePassword,
   forgotThePassword,
+  verifyOTP,
 } from "../controllers/fPassword.controller";
 import {
   schema,
@@ -19,6 +20,15 @@ route.post(
   forgotThePassword
 );
 
-route.post("/api/f-password/changePassword", changePassword);
+route.post(
+  "/api/verifyOtp/:id",
+  validateSchema(schema.User.verifyOTP),
+  verifyOTP
+);
 
+route.post(
+  "/api/v-changePassword/:id",
+  validateSchema(schema.User.vChangePassword),
+  vChangePassword
+);
 export default route;

@@ -12,9 +12,7 @@ export const refreshAccessTokenOrRefreshToken = async (
   try {
     const token: any = await Token.findOne({ accessToken: req.user });
     if (!token)
-      return res
-        .status(400)
-        .json({ success: false, message: "Token is wrong" });
+      return res.status(400).json({ success: false, message: "Token invalid" });
     jwt.verify(
       token?.refreshToken as string,
       process.env.REFRESHTOKENSECRET as string,
@@ -22,7 +20,7 @@ export const refreshAccessTokenOrRefreshToken = async (
         const user = await User.findOne({ token: token.id });
         if (!user)
           return res
-            .status(400)
+            .status(401)
             .json({ success: false, message: "User not found" });
         if (error) {
           const { accessToken, refreshToken } = await generateAccessToken(

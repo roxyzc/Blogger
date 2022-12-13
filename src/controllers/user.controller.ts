@@ -17,7 +17,7 @@ export const findAllUserAndQuery = async (
           .sort({ createdAt: -1 })
           .select("username email valid")
       : await User.find({
-          role: "admin",
+          role: "user",
         })
           .limit(Number(limit))
           .sort({ createdAt: -1 })

