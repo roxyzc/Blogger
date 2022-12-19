@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { findAllUserAndQuery } from "../controllers/user.controller";
+import {
+  changeAvatar,
+  changeProfile,
+  findAllUserAndQuery,
+} from "../controllers/user.controller";
+import upload from "../config/multer.config";
 import {
   vChangePassword,
   forgotThePassword,
@@ -9,7 +14,10 @@ import {
   schema,
   validateSchema,
 } from "../middlewares/validationSchemas.middleware";
-import { verifyToken } from "../middlewares/verifyToken.middleware";
+import {
+  verifyToken,
+  verifyTokenAndAuthorization,
+} from "../middlewares/verifyToken.middleware";
 
 const route: Router = Router();
 
@@ -30,5 +38,18 @@ route.post(
   "/api/v-changePassword/:id",
   validateSchema(schema.User.vChangePassword),
   vChangePassword
+);
+
+route.put(
+  "/api/user/:id",
+  verifyTokenAndAuthorization,
+  validateSchema(schema.User.profile),
+  changeProfile
+);
+route.post(
+  "/api/avatarUser/:id",
+  verifyTokenAndAuthorization,
+  upload.single("image"),
+  changeAvatar
 );
 export default route;

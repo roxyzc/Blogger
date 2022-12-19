@@ -31,7 +31,7 @@ const OtpSchema: Schema = new Schema(
       default: Date.now() + 1000 * 60 * 5,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 export default model<IOTPModel>("OTP", OtpSchema);

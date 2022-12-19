@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import User from "../models/users.model";
+import User from "../models/user.model";
 import Token from "../models/token.model";
 import { logger } from "../libraries/Logger.library";
 import { sendEmail } from "../utils/sendEmail.util";

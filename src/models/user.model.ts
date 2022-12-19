@@ -1,6 +1,7 @@
 import { model, Schema, Document, PopulatedDoc, ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
 import { ITokenModel } from "./token.model";
+import { IAvatarModel } from "./avatar.model";
 
 export interface IUser {
   username: String;
@@ -8,7 +9,7 @@ export interface IUser {
   password: String;
   role: String;
   valid: Boolean;
-  image?: String;
+  image?: PopulatedDoc<Document<ObjectId> & IAvatarModel>;
   token?: PopulatedDoc<Document<ObjectId> & ITokenModel>;
   createdAt: Date;
   updatedAt: Date;
@@ -44,9 +45,8 @@ const UserSchema: Schema = new Schema(
       default: "user",
     },
     image: {
-      type: String,
-      default: undefined,
-      required: false,
+      type: Schema.Types.ObjectId,
+      ref: "Avatar",
     },
     valid: {
       type: Boolean,

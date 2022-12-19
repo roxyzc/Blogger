@@ -1,4 +1,4 @@
-import User from "../models/users.model";
+import User from "../models/user.model";
 import { logger } from "../libraries/Logger.library";
 import { Request, Response } from "express";
 import OTP from "../models/otp.model";

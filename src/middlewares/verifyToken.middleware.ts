@@ -23,7 +23,6 @@ export const verifyToken = async (
             .status(403)
             .json({ success: false, message: "Invalid token" });
         req.user = decoded;
-        console.log(req.user);
         next();
       }
     );

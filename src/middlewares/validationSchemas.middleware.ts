@@ -115,5 +115,22 @@ export const schema = {
           "any.only": "{{#label}} does not match",
         }),
     }),
+    profile: joi.object({
+      username: joi.string().min(3).max(20).trim().label("Username").messages({
+        "string.base": `{{#label}} should be a type of 'text'`,
+        "string.min": `{{#label}} should have a minimum length of {#limit}`,
+        "string.max": `{{#label}} must be less than or equal to {#limit}`,
+      }),
+      password: joi.string().min(8).max(30).label("Password").messages({
+        "string.min": `{{#label}} should have a minimum length of {#limit}`,
+        "string.max": `{{#label}} must be less than or equal to {#limit}`,
+      }),
+    }),
   },
 };
+
+// image: joi
+//         .object({
+//           type: joi.string().label("image"),
+//         })
+//         .unknown(true),

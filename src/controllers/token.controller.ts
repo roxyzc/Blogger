@@ -1,5 +1,5 @@
 import Token from "../models/token.model";
-import User from "../models/users.model";
+import User from "../models/user.model";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { generateAccessToken, refreshToken } from "../utils/token.util";
@@ -17,7 +17,9 @@ export const refreshAccessTokenOrRefreshToken = async (
       token?.refreshToken as string,
       process.env.REFRESHTOKENSECRET as string,
       async (error: any, _decoded: any): Promise<any> => {
-        const user = await User.findOne({ token: token.id });
+        const user = await User.findOne({ token: token.id })
+          .select("_id username email token")
+          .populate("token");
         if (!user)
           return res
             .status(401)
@@ -33,7 +35,7 @@ export const refreshAccessTokenOrRefreshToken = async (
           }).save();
           return res.status(200).json({
             success: true,
-            data: { user, token: { accessToken, refreshToken } },
+            data: { user },
           });
         }
         const { accessToken } = await refreshToken(
@@ -43,9 +45,7 @@ export const refreshAccessTokenOrRefreshToken = async (
         Object.assign(token, {
           accessToken,
         }).save();
-        return res
-          .status(200)
-          .json({ success: true, data: { user, token: { accessToken } } });
+        return res.status(200).json({ success: true, data: { user } });
       }
     );
   } catch (error: any) {

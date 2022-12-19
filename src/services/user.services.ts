@@ -1,5 +1,5 @@
 import { compare } from "bcrypt";
-import User from "../models/users.model";
+import User from "../models/user.model";
 
 export const checkAdmin = async (email: string, password: string) => {
   return email === process.env.EMAIL_ADMIN &&
