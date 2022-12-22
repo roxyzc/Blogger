@@ -25,7 +25,6 @@ export const findAllUserAndQuery = async (
           .limit(Number(limit))
           .sort({ createdAt: -1 })
           .select("username email valid");
-    console.log(users);
     return res.status(200).json({ success: true, data: { users } });
   } catch (error: any) {
     logger.error(error.message);
@@ -50,12 +49,12 @@ export const changeAvatar = async (req: Request, res: Response) => {
         .json({ success: false, message: "avatar successfully changed" });
     }
     const result = await cloud.uploader.upload(req.file?.path as string);
-    if (user.image === undefined) {
+    if (user.image === undefined || user.image === null || user.image === "") {
       const avatar = await Avatar.create({
         avatar: result.secure_url,
         cloudinary_id: result.public_id,
       });
-      await (user.image = avatar.id).save();
+      await user.$set("image", avatar.id).save();
       return res.status(200).json({
         success: true,
         message: "avatar successfully changed",
@@ -65,7 +64,6 @@ export const changeAvatar = async (req: Request, res: Response) => {
     await user
       .populate("image")
       .then(() => cloud.uploader.destroy(user.image.cloudinary_id));
-    // await cloud.uploader.destroy(user.image.cloudinary_id);
     const avatar = await Avatar.findByIdAndUpdate(
       user.image,
       {
@@ -81,8 +79,7 @@ export const changeAvatar = async (req: Request, res: Response) => {
       profile: avatar,
     });
   } catch (error: any) {
-    // logger.error(error.message);
-    console.log(error);
+    logger.error(error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

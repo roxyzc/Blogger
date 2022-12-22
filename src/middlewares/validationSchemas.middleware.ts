@@ -128,9 +128,3 @@ export const schema = {
     }),
   },
 };
-
-// image: joi
-//         .object({
-//           type: joi.string().label("image"),
-//         })
-//         .unknown(true),

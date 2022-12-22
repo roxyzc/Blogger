@@ -146,13 +146,12 @@ export const accountVerification = async (
 
 export const logout = async (req: Request, res: Response): Promise<any> => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate("token");
     if (!user) {
       return res.status(200).json({ success: true, message: "Logout" });
     }
-    await Token.findByIdAndDelete(user.token);
-    user.token = undefined;
-    user.save();
+    await Token.findByIdAndDelete(user.token._id);
+    await user.$set("token", undefined).save();
     return res.status(200).json({ success: true, message: "Logout" });
   } catch (error: any) {
     logger.error(error.message);

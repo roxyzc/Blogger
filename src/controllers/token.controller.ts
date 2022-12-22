@@ -17,9 +17,9 @@ export const refreshAccessTokenOrRefreshToken = async (
       token?.refreshToken as string,
       process.env.REFRESHTOKENSECRET as string,
       async (error: any, _decoded: any): Promise<any> => {
-        const user = await User.findOne({ token: token.id })
-          .select("_id username email token")
-          .populate("token");
+        const user = await User.findOne({ token: token.id }).select(
+          "_id username email token"
+        );
         if (!user)
           return res
             .status(401)
@@ -29,10 +29,11 @@ export const refreshAccessTokenOrRefreshToken = async (
             user?.id as string,
             user?.role as string
           );
-          Object.assign(token, {
+          await Object.assign(token, {
             accessToken: accessToken,
             refreshToken: refreshToken,
           }).save();
+          await user.populate("token");
           return res.status(200).json({
             success: true,
             data: { user },
@@ -42,9 +43,10 @@ export const refreshAccessTokenOrRefreshToken = async (
           user?.id as string,
           user?.role as string
         );
-        Object.assign(token, {
+        await Object.assign(token, {
           accessToken,
         }).save();
+        await user.populate("token");
         return res.status(200).json({ success: true, data: { user } });
       }
     );

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { logger } from "../libraries/Logger.library";
+import { findTokenInDatabase } from "../services/token.service";
 
 export const verifyToken = async (
   req: Request,
@@ -14,6 +15,8 @@ export const verifyToken = async (
         .status(401)
         .json({ success: false, message: "Please enter the token" });
     const token = authHeader?.split(" ")[1];
+    if ((await findTokenInDatabase(token)) === false)
+      return res.status(401).json({ success: false, message: "Token Ilegal" });
     jwt.verify(
       token as string,
       process.env.ACCESSTOKENSECRET as string,
