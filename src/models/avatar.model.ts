@@ -1,7 +1,7 @@
 import { model, Schema, Document } from "mongoose";
 
 interface IAvatar {
-  avatar?: String;
+  image?: String;
   cloudinary_id?: String;
 }
 
@@ -9,7 +9,7 @@ export interface IAvatarModel extends IAvatar, Document {}
 
 const AvatarSchema: Schema = new Schema(
   {
-    avatar: {
+    image: {
       type: String,
       unique: true,
     },

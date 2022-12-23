@@ -5,6 +5,7 @@ import { logger } from "../libraries/Logger.library";
 export const validateSchema = (schema: ObjectSchema) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
     try {
+      console.log(req.body);
       await schema.validateAsync(req.body);
       next();
     } catch (error: any) {

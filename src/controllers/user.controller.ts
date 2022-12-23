@@ -51,7 +51,7 @@ export const changeAvatar = async (req: Request, res: Response) => {
     const result = await cloud.uploader.upload(req.file?.path as string);
     if (user.image === undefined || user.image === null || user.image === "") {
       const avatar = await Avatar.create({
-        avatar: result.secure_url,
+        image: result.secure_url,
         cloudinary_id: result.public_id,
       });
       await user.$set("image", avatar.id).save();
@@ -67,7 +67,7 @@ export const changeAvatar = async (req: Request, res: Response) => {
     const avatar = await Avatar.findByIdAndUpdate(
       user.image,
       {
-        avatar: result.secure_url,
+        image: result.secure_url,
         cloudinary_id: result.public_id,
       },
       { new: true }
