@@ -4,7 +4,6 @@ import {
   changeProfile,
   findAllUserAndQuery,
 } from "../controllers/user.controller";
-import upload from "../config/multer.config";
 import {
   vChangePassword,
   forgotThePassword,
@@ -18,6 +17,7 @@ import {
   verifyToken,
   verifyTokenAndAuthorization,
 } from "../middlewares/verifyToken.middleware";
+import { validateFile } from "../middlewares/validationFile.middleware";
 
 const route: Router = Router();
 
@@ -46,10 +46,12 @@ route.put(
   validateSchema(schema.User.profile),
   changeProfile
 );
+
 route.post(
   "/api/avatarUser/:id",
   verifyTokenAndAuthorization,
-  upload.single("image"),
+  validateFile,
+  validateSchema(schema.User.changeAvatarUser),
   changeAvatar
 );
 export default route;

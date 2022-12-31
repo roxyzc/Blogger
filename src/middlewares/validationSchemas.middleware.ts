@@ -5,7 +5,6 @@ import { logger } from "../libraries/Logger.library";
 export const validateSchema = (schema: ObjectSchema) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
     try {
-      console.log(req.body);
       await schema.validateAsync(req.body);
       next();
     } catch (error: any) {
@@ -126,6 +125,32 @@ export const schema = {
         "string.min": `{{#label}} should have a minimum length of {#limit}`,
         "string.max": `{{#label}} must be less than or equal to {#limit}`,
       }),
+    }),
+    changeAvatarUser: joi.object({
+      image: joi.any().required().label("Image"),
+    }),
+  },
+  Blog: {
+    createBlog: joi.object({
+      title: joi.string().required().min(3).max(20).label("Title").messages({
+        "string.base": `{{#label}} should be a type of 'text'`,
+        "string.min": `{{#label}} should have a minimum length of {#limit}`,
+        "string.max": `{{#label}} must be less than or equal to {#limit}`,
+        "any.required": `{{#label}} is a required field`,
+      }),
+      content: joi
+        .string()
+        .required()
+        .min(3)
+        .max(5000)
+        .label("Content")
+        .messages({
+          "string.base": `{{#label}} should be a type of 'text'`,
+          "string.min": `{{#label}} should have a minimum length of {#limit}`,
+          "string.max": `{{#label}} must be less than or equal to {#limit}`,
+          "any.required": `{{#label}} is a required field`,
+        }),
+      image: joi.any().required().label("image"),
     }),
   },
 };

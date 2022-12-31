@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
+import bodyParser from "body-parser";
 import { connectToDatabase } from "./config/connectToDatabase.config";
 import { notFound, errorHandler } from "./middlewares/errorHandlers.middleware";
 import AuthRoute from "./routes/auth.route";
@@ -16,8 +17,8 @@ connectToDatabase();
 if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(helmet());
 app.use(AuthRoute);
