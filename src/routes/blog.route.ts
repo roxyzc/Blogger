@@ -1,21 +1,32 @@
 import { Router } from "express";
 // import upload from "../config/multer.config";
-import { createBlog } from "../controllers/blog.controller";
+import {
+  createBlog,
+  deleteBlog,
+  findBlog,
+  likeBlog,
+} from "../controllers/blog.controller";
 import { validateFile } from "../middlewares/validationFile.middleware";
 import {
   validateSchema,
   schema,
 } from "../middlewares/validationSchemas.middleware";
-import { verifyToken } from "../middlewares/verifyToken.middleware";
+import {
+  verifyToken,
+  verifyTokenAndAuthorization,
+} from "../middlewares/verifyToken.middleware";
 const route = Router();
 
+route.get("/api/blog", findBlog);
 route
-  .route("/api/blog")
+  .route("/api/blog/:id")
   .post(
-    verifyToken,
+    verifyTokenAndAuthorization,
     validateFile,
     validateSchema(schema.Blog.createBlog),
     createBlog
-  );
+  )
+  .get(verifyToken, likeBlog)
+  .delete(verifyTokenAndAuthorization, deleteBlog);
 
 export default route;

@@ -30,68 +30,86 @@ export const createBlog = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     logger.error(error.message);
-    res.status(500).json({ success: false, message: error });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// export const coba = (req: Request, res: Response) => {
-//   try {
-//     const { title, content, image } = req.body;
-//     res.status(200).json({ success: true, data: { title, content, image } });
-//   } catch (error) {
-//     res.status(500).json({ error });
-//   }
-//   // return upload.single("image")(req, res, (): any => {
-//   //   try {
-//   //     console.log(req.file);
-//   //     if (req.file === undefined)
-//   //       return res.status(400).json({ success: false, message: "gagal" });
-//   //   } catch (error: any) {
-//   //     return res.status(400).json({
-//   //       success: false,
-//   //       message: error.message,
-//   //     });
-//   //   }
-//   // });
-// };
+export const findBlog = async (req: Request, res: Response) => {
+  const { limit = 10, title } = req.query;
+  try {
+    const blogs =
+      title === undefined
+        ? await Blog.find().limit(Number(limit))
+        : await Blog.find({ title: title })
+            .sort({ like: 1 })
+            .limit(Number(limit));
+    res.status(200).json({ success: true, message: blogs });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
-// const objectifyFormdata = (data: any) => {
-//   return data
-//     .getBuffer()
-//     .toString()
-//     .split(data.getBoundary())
-//     .filter((e: any) => e.includes("form-data"))
-//     .map((e: any) =>
-//       e
-//         .replace(/[\-]+$/g, "")
-//         .replace(/^[\-]+/g, "")
-//         .match(/\; name\=\"([^\"]+)\"(.*)/s)
-//         .filter((_v: any, i: any) => i == 1 || i == 2)
-//         .map((e: any) => e.trim())
-//     )
-//     .reduce((acc: any, cur: any) => {
-//       acc[cur[0]] = cur[1];
-//       return acc;
-//     }, {});
-// };
+export const deleteBlog = async (req: Request, res: Response): Promise<any> => {
+  const session = Blog.startSession();
+  try {
+    (await session).withTransaction(async (): Promise<any> => {
+      const blog = await Blog.findByIdAndDelete(req.params.id).populate(
+        "thumbnail"
+      );
+      if (!blog)
+        return res
+          .status(400)
+          .json({ success: false, message: "Blog not found" });
 
-// function rawFormDataToJSON(raw_data: any, boundary: any) {
-//   var spl = raw_data.split(boundary);
-//   var data_out: any[] = [];
-//   spl.forEach((element: any) => {
-//     let obj: any = {};
-//     let ll = element.split("\n");
-//     if (ll[1]) {
-//       let key = ll[1].split("=")[1].replace('"', "").replace('"\r', "");
-//       let val = "";
-//       if (ll.length > 3) {
-//         for (let i = 3; i < ll.length; i++) {
-//           val += ll[i] + "\n";
-//         }
-//       }
-//       obj[key] = val.replace("--", "").replace("\r\n\n", "");
-//       data_out.push(obj);
-//     }
-//   });
-//   return data_out;
-// }
+      if (blog.thumbnail === null) {
+        console.log(blog);
+        (await session).abortTransaction();
+        return res.status(200).json({ success: false });
+      }
+      await cloud.uploader.destroy(blog.thumbnail.cloudinary_id);
+      return res.status(200).json({
+        success: true,
+        message: "The blog has been successfully deleted",
+        blog,
+      });
+    });
+  } catch (error: any) {
+    (await session).abortTransaction();
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const likeBlog = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog)
+      return res
+        .status(400)
+        .json({ success: false, message: "Blog not found" });
+
+    let index = -1;
+    const findId = blog.like?.filter((e: any, x): any => {
+      if (String(e.userId).includes(String(req.user.id))) {
+        index = x;
+        return e.userId;
+      }
+    });
+
+    if (index === -1 && findId?.length === 0) {
+      blog.like?.push({ userId: req.user.id });
+      await blog.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "successfully liked the blog" });
+    }
+
+    blog.like?.splice(index, 1);
+    await blog.save();
+    return res.status(200).json({ success: true, message: "cancel" });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

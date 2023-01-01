@@ -103,7 +103,6 @@ export const accountVerification = async (
   res: Response
 ): Promise<any> => {
   try {
-    console.log(req.params.token);
     const findUser = await User.findById(req.params.token).select(
       "id username email valid"
     );
