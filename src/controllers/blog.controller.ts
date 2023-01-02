@@ -1,5 +1,6 @@
 import Blog from "../models/blog.model";
 import Avatar from "../models/avatar.model";
+import Comment from "../models/comment.model";
 import { Request, Response } from "express";
 import cloud from "../config/cloudinary.config";
 import { logger } from "../libraries/Logger.library";
@@ -108,6 +109,32 @@ export const likeBlog = async (req: Request, res: Response): Promise<any> => {
     blog.like?.splice(index, 1);
     await blog.save();
     return res.status(200).json({ success: true, message: "cancel" });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const commentBlog = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { content } = req.body;
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog)
+      return res
+        .status(400)
+        .json({ success: false, message: "Blog not found" });
+    const comment = await Comment.create({
+      userId: req.user.id,
+      content: content,
+    });
+    blog.comment?.push({ commentId: comment.id });
+    await blog.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "created comment successfully" });
   } catch (error: any) {
     logger.error(error.message);
     res.status(500).json({ success: false, message: error.message });

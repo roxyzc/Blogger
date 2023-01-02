@@ -1,5 +1,4 @@
 import { Router } from "express";
-// import upload from "../config/multer.config";
 import {
   createBlog,
   deleteBlog,

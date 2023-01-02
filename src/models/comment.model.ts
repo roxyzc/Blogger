@@ -2,7 +2,7 @@ import { model, Schema, Document, PopulatedDoc, ObjectId } from "mongoose";
 import { IUserModel } from "./user.model";
 
 interface IComment {
-  blogId: PopulatedDoc<Document<ObjectId> & IUserModel>;
+  userId: PopulatedDoc<Document<ObjectId> & IUserModel>;
   content: String;
   like?: [
     {
@@ -11,7 +11,7 @@ interface IComment {
   ];
   comment: [
     {
-      userId: PopulatedDoc<Document<ObjectId> & ICommentModel>;
+      commentId: PopulatedDoc<Document<ObjectId> & ICommentModel>;
     }
   ];
   createdAt: Date;
@@ -22,7 +22,7 @@ export interface ICommentModel extends IComment, Document {}
 
 const CommentSchema: Schema = new Schema(
   {
-    blogId: {
+    userId: {
       required: true,
       type: Schema.Types.ObjectId,
       ref: "Blog",
@@ -43,7 +43,7 @@ const CommentSchema: Schema = new Schema(
     ],
     comment: [
       {
-        userId: {
+        commentId: {
           type: Schema.Types.ObjectId,
           ref: "Comment",
         },

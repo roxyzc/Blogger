@@ -15,7 +15,7 @@ interface IBlog {
   ];
   comment?: [
     {
-      userId: PopulatedDoc<Document<ObjectId> & ICommentModel>;
+      commentId: PopulatedDoc<Document<ObjectId> & ICommentModel>;
     }
   ];
   createdAt: Date;
@@ -58,7 +58,7 @@ const BlogSchema: Schema = new Schema(
     ],
     comment: [
       {
-        userId: {
+        commentId: {
           type: Schema.Types.ObjectId,
           ref: "Comment",
         },
