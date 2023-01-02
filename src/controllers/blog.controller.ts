@@ -35,7 +35,7 @@ export const createBlog = async (req: Request, res: Response) => {
   }
 };
 
-export const findBlog = async (req: Request, res: Response) => {
+export const findBlogs = async (req: Request, res: Response) => {
   const { limit = 10, title } = req.query;
   try {
     const blogs =
@@ -44,7 +44,29 @@ export const findBlog = async (req: Request, res: Response) => {
         : await Blog.find({ title: title })
             .sort({ like: 1 })
             .limit(Number(limit));
-    res.status(200).json({ success: true, message: blogs });
+    res.status(200).json({ success: true, data: blogs });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const findBlogsWithId = async (req: Request, res: Response) => {
+  try {
+    const blogs = await Blog.find({ userId: req.params.id })
+      .sort({ updatedAt: 1 })
+      .limit(10);
+    res.status(200).json({ success: true, data: blogs });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const findBlog = async (req: Request, res: Response) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    res.status(200).json({ success: true, data: blog });
   } catch (error: any) {
     logger.error(error.message);
     res.status(500).json({ success: false, message: error.message });

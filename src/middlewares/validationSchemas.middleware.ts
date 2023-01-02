@@ -132,16 +132,23 @@ export const schema = {
   },
   Blog: {
     createBlog: joi.object({
-      title: joi.string().required().min(3).max(20).label("Title").messages({
-        "string.base": `{{#label}} should be a type of 'text'`,
-        "string.min": `{{#label}} should have a minimum length of {#limit}`,
-        "string.max": `{{#label}} must be less than or equal to {#limit}`,
-        "any.required": `{{#label}} is a required field`,
-      }),
+      title: joi
+        .string()
+        .required()
+        .trim()
+        .min(3)
+        .max(20)
+        .label("Title")
+        .messages({
+          "string.base": `{{#label}} should be a type of 'text'`,
+          "string.min": `{{#label}} should have a minimum length of {#limit}`,
+          "string.max": `{{#label}} must be less than or equal to {#limit}`,
+          "any.required": `{{#label}} is a required field`,
+        }),
       content: joi
         .string()
         .required()
-        .min(3)
+        .min(1)
         .max(5000)
         .label("Content")
         .messages({
@@ -153,4 +160,19 @@ export const schema = {
       image: joi.any().required().label("image"),
     }),
   },
+  comment: joi.object({
+    content: joi
+      .string()
+      .required()
+      .trim()
+      .min(1)
+      .max(5000)
+      .label("Content")
+      .messages({
+        "string.base": `{{#label}} should be a type of 'text'`,
+        "string.min": `{{#label}} should have a minimum length of {#limit}`,
+        "string.max": `{{#label}} must be less than or equal to {#limit}`,
+        "any.required": `{{#label}} is a required field`,
+      }),
+  }),
 };

@@ -9,6 +9,7 @@ import AuthRoute from "./routes/auth.route";
 import TokenRoute from "./routes/token.route";
 import UserRoute from "./routes/user.route";
 import BlogRoute from "./routes/blog.route";
+import CommentRoute from "./routes/comment.route";
 import "dotenv/config";
 
 const app: Application = express();
@@ -24,6 +25,7 @@ app.use(helmet());
 app.use(AuthRoute);
 app.use(UserRoute);
 app.use(BlogRoute);
+app.use(CommentRoute);
 app.use(TokenRoute);
 app.use(notFound);
 app.use(errorHandler);
