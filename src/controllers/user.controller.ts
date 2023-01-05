@@ -3,7 +3,6 @@ import { logger } from "../libraries/Logger.library";
 import { Request, Response } from "express";
 import Avatar from "../models/avatar.model";
 import cloud from "../config/cloudinary.config";
-import { hash } from "../utils/hashing.util";
 
 export const findAllUserAndQuery = async (
   req: Request,
@@ -87,19 +86,23 @@ export const changeAvatar = async (req: Request, res: Response) => {
 export const changeProfile = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        username,
-        password: await hash(password),
-      },
-      { new: true }
-    ).select("_id username email password role valid image");
+    const user = await User.findById(req.params.id).select(
+      "username email password image"
+    );
+
     if (!user)
       return res
         .status(400)
         .json({ success: false, message: "User not found" });
 
+    if ((!username && !password) || username === user.username)
+      return res.sendStatus(400);
+    if (username !== undefined) user.username = username;
+    if (password !== undefined) {
+      if (await user.comparePassword(password)) return res.sendStatus(400);
+      user.password = password;
+    }
+    await user.save();
     return res.status(200).json({
       success: true,
       message: "Profile successfully changed",

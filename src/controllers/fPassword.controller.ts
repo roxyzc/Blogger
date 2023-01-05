@@ -3,7 +3,7 @@ import { logger } from "../libraries/Logger.library";
 import { Request, Response } from "express";
 import OTP from "../models/otp.model";
 import { generateOTP } from "../services/otp.service";
-import { hash, compare } from "../utils/hashing.util";
+import { compare } from "../utils/hashing.util";
 import { sendOTPWithEmail } from "../utils/sendEmail.util";
 
 export const forgotThePassword = async (
@@ -24,12 +24,11 @@ export const forgotThePassword = async (
       if (findOtp)
         return res.status(400).json({ success: false, message: "OTP exist" });
 
-      const otp: string = generateOTP();
       const createOTP = await OTP.create({
-        OTP: await hash(otp),
+        OTP: generateOTP(),
         email,
       });
-      const valid = await sendOTPWithEmail(email, otp);
+      const valid = await sendOTPWithEmail(email, createOTP.OTP as string);
       if (!valid) {
         (await session).abortTransaction();
         return res
@@ -38,7 +37,7 @@ export const forgotThePassword = async (
       }
       return res
         .status(200)
-        .json({ success: true, message: "check your email", id: createOTP.id });
+        .json({ success: true, message: "check your email" });
     });
   } catch (error: any) {
     logger.error(error.message);
@@ -49,16 +48,14 @@ export const forgotThePassword = async (
 export const verifyOTP = async (req: Request, res: Response): Promise<any> => {
   const { otp } = req.body;
   try {
-    const findOtp = await OTP.findById(req.params.id);
+    const findOtp = await OTP.findOne({ OTP: otp });
     if (!findOtp) {
-      return res.sendStatus(401);
-    }
-    const valid = await compare(otp as string, findOtp?.OTP as string);
-    if (!valid) {
       return res.status(400).json({ success: false, message: "OTP invalid" });
     }
+    const user = await User.findOne({ email: findOtp.email });
+    if (!user) return res.sendStatus(401);
     await findOtp.set("verify", true).save();
-    return res.status(200).json({ success: true, id: findOtp.id });
+    return res.status(200).json({ success: true, id: user.id });
   } catch (error: any) {
     logger.error(error.message);
     return res.status(500).json({ success: false, message: error.message });
@@ -71,15 +68,15 @@ export const vChangePassword = async (
 ): Promise<any> => {
   const { password } = req.body;
   try {
-    const findOtp = await OTP.findById(req.params.id);
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.sendStatus(401);
+    }
+    const findOtp = await OTP.findOne({ email: user.email });
     if (!findOtp || findOtp.verify === false) {
       return res.sendStatus(401);
     }
 
-    const user = await User.findOne({ email: findOtp.email });
-    if (!user) {
-      return res.sendStatus(401);
-    }
     const checkPassword = await compare(password, user.password as string);
     if (checkPassword === true)
       return res

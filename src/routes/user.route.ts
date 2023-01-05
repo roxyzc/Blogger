@@ -28,11 +28,7 @@ route.post(
   forgotThePassword
 );
 
-route.post(
-  "/api/verifyOtp/:id",
-  validateSchema(schema.User.verifyOTP),
-  verifyOTP
-);
+route.post("/api/verifyOtp", validateSchema(schema.User.verifyOTP), verifyOTP);
 
 route.post(
   "/api/v-changePassword/:id",
