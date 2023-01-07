@@ -39,5 +39,4 @@ route.post(
   validateSchema(schema.comment),
   commentBlog
 );
-
 export default route;

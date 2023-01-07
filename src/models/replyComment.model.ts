@@ -1,39 +1,33 @@
 import { model, Schema, Document, PopulatedDoc, ObjectId } from "mongoose";
 import { IUserModel } from "./user.model";
-import { IReplyCommentModel } from "./replyComment.model";
-import { IBlogModel } from "./blog.model";
+import { ICommentModel } from "./comment.model";
 
-interface IComment {
+interface IReplyComment {
   userId: PopulatedDoc<Document<ObjectId> & IUserModel>;
-  blogId: PopulatedDoc<Document<ObjectId> & IBlogModel>;
+  commentId: PopulatedDoc<Document<ObjectId> & ICommentModel>;
   content: String;
   like?: [
     {
       userId: PopulatedDoc<Document<ObjectId> & IUserModel>;
     }
   ];
-  comment: [
-    {
-      commentId: PopulatedDoc<Document<ObjectId> & IReplyCommentModel>;
-    }
-  ];
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ICommentModel extends IComment, Document {}
+export interface IReplyCommentModel extends IReplyComment, Document {}
 
-const CommentSchema: Schema = new Schema(
+const ReplyCommentSchema: Schema = new Schema(
   {
     userId: {
       required: true,
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    blogId: {
+    commentId: {
       required: true,
       type: Schema.Types.ObjectId,
-      ref: "Blog",
+      ref: "Comment",
     },
     content: {
       type: String,
@@ -49,9 +43,10 @@ const CommentSchema: Schema = new Schema(
         },
       },
     ],
-    comment: [
+    tags: [
       {
-        commentId: {
+        replyCommentId: {
+          required: true,
           type: Schema.Types.ObjectId,
           ref: "ReplyComment",
         },
@@ -61,4 +56,4 @@ const CommentSchema: Schema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
-export default model<ICommentModel>("Comment", CommentSchema);
+export default model<ICommentModel>("ReplyComment", ReplyCommentSchema);

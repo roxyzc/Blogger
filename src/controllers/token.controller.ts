@@ -24,6 +24,7 @@ export const refreshAccessTokenOrRefreshToken = async (
           return res
             .status(401)
             .json({ success: false, message: "User not found" });
+        console.log(user.role);
         if (error) {
           const { accessToken, refreshToken } = await generateAccessToken(
             user?.id as string,

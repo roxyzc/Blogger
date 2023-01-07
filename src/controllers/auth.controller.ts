@@ -80,8 +80,8 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     }
     if (user.token == null || user.token == undefined) {
       const { accessToken, refreshToken } = await generateAccessToken(
-        user.id,
-        user.role
+        user.id as string,
+        user.role as string
       );
       const createToken = await Token.create({ accessToken, refreshToken });
       Object.assign(user, { token: createToken._id });

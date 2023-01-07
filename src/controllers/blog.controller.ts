@@ -1,6 +1,7 @@
 import Blog from "../models/blog.model";
 import Avatar from "../models/avatar.model";
 import Comment from "../models/comment.model";
+import ReplyComment from "../models/replyComment.model";
 import { Request, Response } from "express";
 import cloud from "../config/cloudinary.config";
 import { logger } from "../libraries/Logger.library";
@@ -78,7 +79,7 @@ export const deleteBlog = async (req: Request, res: Response): Promise<any> => {
   try {
     (await session).withTransaction(async (): Promise<any> => {
       const blog = await Blog.findByIdAndDelete(req.params.id).populate(
-        "thumbnail"
+        "thumbnail comment.commentId"
       );
       if (!blog)
         return res
@@ -86,11 +87,22 @@ export const deleteBlog = async (req: Request, res: Response): Promise<any> => {
           .json({ success: false, message: "Blog not found" });
 
       if (blog.thumbnail === null) {
-        console.log(blog);
         (await session).abortTransaction();
         return res.status(200).json({ success: false });
       }
       await cloud.uploader.destroy(blog.thumbnail.cloudinary_id);
+      blog.comment?.forEach(async (value1) => {
+        const comment = await Comment.findByIdAndDelete(
+          value1.commentId.id
+        ).populate("comment.commentId");
+        let i = Number(comment?.comment.length);
+        if (i !== 0) {
+          comment?.comment.forEach(async (value2) => {
+            await ReplyComment.findByIdAndDelete(value2.commentId.id);
+            i--;
+          });
+        }
+      });
       return res.status(200).json({
         success: true,
         message: "The blog has been successfully deleted",
@@ -150,6 +162,7 @@ export const commentBlog = async (
         .json({ success: false, message: "Blog not found" });
     const comment = await Comment.create({
       userId: req.user.id,
+      blogId: req.params.id,
       content: content,
     });
     blog.comment?.push({ commentId: comment.id });
