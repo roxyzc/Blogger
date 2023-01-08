@@ -45,6 +45,18 @@ export const comment = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
+export const deleteComment = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const deleteComment = await Comment.findByIdAndDelete(req.params.id);
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const likeComment = async (
   req: Request,
   res: Response
