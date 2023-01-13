@@ -10,6 +10,7 @@ import TokenRoute from "./routes/token.route";
 import UserRoute from "./routes/user.route";
 import BlogRoute from "./routes/blog.route";
 import CommentRoute from "./routes/comment.route";
+import cookieParser from "cookie-parser";
 import "dotenv/config";
 
 const app: Application = express();
@@ -20,8 +21,14 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(helmet());
+app.use(cookieParser());
 app.use(AuthRoute);
 app.use(UserRoute);
 app.use(BlogRoute);

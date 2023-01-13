@@ -1,15 +1,25 @@
 import { Router } from "express";
 import {
-  comment,
+  replyComment,
   findComments,
   findReplyComments,
+  deleteComment,
+  deleteReplyComment,
 } from "../controllers/comment.controller";
-import { verifyToken } from "../middlewares/verifyToken.middleware";
+import {
+  verifyToken,
+  verifyTokenAndAuthorization,
+} from "../middlewares/verifyToken.middleware";
 const route = Router();
 
 route.get("/api/comments", verifyToken, findComments);
+route
+  .route("/api/comment/:id")
+  .post(verifyToken, replyComment)
+  .delete(verifyTokenAndAuthorization, deleteComment);
 route.get("/api/replyComments", verifyToken, findReplyComments);
-
-route.route("/api/comment/:id").post(verifyToken, comment);
+route
+  .route("/api/replyComment/:id")
+  .delete(verifyTokenAndAuthorization, deleteReplyComment);
 
 export default route;

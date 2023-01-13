@@ -18,13 +18,12 @@ export const refreshAccessTokenOrRefreshToken = async (
       process.env.REFRESHTOKENSECRET as string,
       async (error: any, _decoded: any): Promise<any> => {
         const user = await User.findOne({ token: token.id }).select(
-          "_id username email token"
+          "_id username email token role"
         );
         if (!user)
           return res
             .status(401)
             .json({ success: false, message: "User not found" });
-        console.log(user.role);
         if (error) {
           const { accessToken, refreshToken } = await generateAccessToken(
             user?.id as string,
