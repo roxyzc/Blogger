@@ -19,7 +19,7 @@ export const createBlog = async (req: Request, res: Response) => {
     });
 
     const blog = await Blog.create({
-      userId: req.user.id,
+      userId: req.USER.id,
       title,
       content,
       thumbnail: thumbnail.id,
@@ -126,14 +126,14 @@ export const likeBlog = async (req: Request, res: Response): Promise<any> => {
 
     let index = -1;
     const findId = blog.like?.filter((e: any, x): any => {
-      if (String(e.userId).includes(String(req.user.id))) {
+      if (String(e.userId).includes(String(req.USER.id))) {
         index = x;
         return e.userId;
       }
     });
 
     if (index === -1 && findId?.length === 0) {
-      blog.like?.push({ userId: req.user.id });
+      blog.like?.push({ userId: req.USER.id });
       await blog.save();
       return res
         .status(200)
@@ -161,7 +161,7 @@ export const commentBlog = async (
         .status(400)
         .json({ success: false, message: "Blog not found" });
     const comment = await Comment.create({
-      userId: req.user.id,
+      userId: req.USER.id,
       blogId: req.params.id,
       content: content,
     });

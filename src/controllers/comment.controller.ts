@@ -52,14 +52,14 @@ export const likeComment = async (
 
     let index = -1;
     const findId = comment.like?.filter((e: any, x): any => {
-      if (String(e.userId).includes(String(req.user.id))) {
+      if (String(e.userId).includes(String(req.USER.id))) {
         index = x;
         return e.userId;
       }
     });
 
     if (index === -1 && findId?.length === 0) {
-      comment.like?.push({ userId: req.user.id });
+      comment.like?.push({ userId: req.USER.id });
       await comment.save();
       return res
         .status(200)
@@ -96,7 +96,7 @@ export const replyComment = async (
         .status(400)
         .json({ success: false, message: "comment not found" });
     const comment = await ReplyComment.create({
-      userId: req.user.id,
+      userId: req.USER.id,
       commentId: findComment.id,
       content: content,
     });

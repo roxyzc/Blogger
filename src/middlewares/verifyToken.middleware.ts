@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { logger } from "../libraries/Logger.library";
 import { findTokenInDatabase } from "../services/token.service";
-import { decrypt } from "../utils/hashing.util";
+// import { decrypt } from "../utils/hashing.util";
 
 export const verifyToken = async (
   req: Request,
@@ -26,7 +26,7 @@ export const verifyToken = async (
           return res
             .status(403)
             .json({ success: false, message: "Invalid token" });
-        req.user = decoded;
+        req.USER = decoded;
         next();
       }
     );
@@ -43,7 +43,7 @@ export const verifyTokenAndAuthorization = (
 ) => {
   try {
     verifyToken(req, res, () => {
-      if (req.user.role == "admin" || req.user.id === req.params.id)
+      if (req.USER.role == "admin" || req.USER.id === req.params.id)
         return next();
       return res
         .status(403)
@@ -62,7 +62,7 @@ export const verifyTokenAdmin = (
 ) => {
   try {
     verifyToken(req, res, () => {
-      if (req.user.role == "admin") return next();
+      if (req.USER.role == "admin") return next();
       return res
         .status(403)
         .json({ success: false, message: "You are not alowed to do that" });
@@ -79,14 +79,12 @@ export const checkExpired = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    const authHeader = req.cookies["token"];
+    const authHeader = req.headers["authorization"];
     if (!authHeader)
       return res
         .status(401)
         .json({ success: false, message: "token di cookies ndak ada" });
-    // const token = authHeader?.split(" ")[1];
-
-    const token = await decrypt(authHeader);
+    const token = authHeader?.split(" ")[1];
     jwt.verify(
       token as string,
       process.env.ACCESSTOKENSECRET as string,
@@ -95,7 +93,7 @@ export const checkExpired = async (
           return res
             .status(403)
             .json({ success: false, message: "Your token has not expired" });
-        req.user = token;
+        req.USER = token;
         next();
       }
     );
