@@ -2,9 +2,10 @@ import { Request, Response } from "express";
 import User from "../models/user.model";
 import Token from "../models/token.model";
 import { logger } from "../libraries/Logger.library";
-import { sendEmail } from "../utils/sendEmail.util";
+import { sendEmail, sendInfoVerifyAccount } from "../utils/sendEmail.util";
 import { generateAccessToken } from "../utils/token.util";
 import { checkAdmin, createAdmin } from "../services/user.services";
+import { encrypt } from "../utils/hashing.util";
 
 export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
@@ -61,7 +62,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         .status(400)
         .json({ success: false, message: "User not found" });
     }
-    if (user.valid != true || user.expiredAt != undefined) {
+    if (user.valid !== "active" || user.expiredAt !== undefined) {
       return res.status(401).json({
         success: false,
         message:
@@ -86,7 +87,15 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       const createToken = await Token.create({ accessToken, refreshToken });
       Object.assign(user, { token: createToken._id });
     }
+
     const x = await (await user.save()).populate("token");
+    const encToken = await encrypt(x.token.accessToken);
+    res.cookie("token", encToken, {
+      maxAge: 15 * 60 * 1000,
+      sameSite: "none",
+      httpOnly: true,
+      // secure: true, // production
+    });
     return res.status(200).json({
       success: true,
       data: { user: x },
@@ -102,9 +111,10 @@ export const accountVerification = async (
   req: Request,
   res: Response
 ): Promise<any> => {
+  const { email, password } = req.body;
   try {
-    const findUser = await User.findById(req.params.token).select(
-      "id username email valid"
+    const findUser = await User.findOne({ email }).select(
+      "id password username email valid role"
     );
     if (!findUser) {
       return res
@@ -112,26 +122,31 @@ export const accountVerification = async (
         .json({ success: false, message: "User not found" });
     }
 
-    console.log(findUser);
-    if (findUser?.valid === true) {
+    if (findUser?.valid === "active" && findUser?.expiredAt === undefined) {
       return res.status(400).json({
         success: false,
         message: "the user has been validated previously",
       });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.token,
-      {
-        $set: {
-          valid: true,
-        },
-        $unset: {
-          expiredAt: 1,
-        },
-      },
-      { new: true }
-    ).select("id username email valid");
+    if ((await findUser.comparePassword(password)) !== true) {
+      return res
+        .status(400)
+        .json({ success: false, message: "password invalid" });
+    }
+
+    const { accessToken, refreshToken } = await generateAccessToken(
+      findUser.id as string,
+      findUser.role as string
+    );
+    const createToken = await Token.create({ accessToken, refreshToken });
+    Object.assign(findUser, {
+      token: createToken._id,
+      valid: "active",
+      expiredAt: undefined,
+    });
+    const user = await (await findUser.save()).populate("token");
+    await sendInfoVerifyAccount(email, findUser.username as string);
     return res.status(200).json({
       success: true,
       data: { user },

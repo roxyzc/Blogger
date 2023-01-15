@@ -83,6 +83,25 @@ export const changeAvatar = async (req: Request, res: Response) => {
   }
 };
 
+export const banUser = async (req: Request, res: Response): Promise<any> => {
+  const { valid } = req.body;
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id, role: { $ne: "admin" } },
+      { $set: { valid: valid } },
+      { new: true }
+    ).select("username email valid role");
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "user not found" });
+    res.status(200).json({ success: true, data: { user } });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const changeProfile = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   try {

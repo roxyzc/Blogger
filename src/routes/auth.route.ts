@@ -27,7 +27,11 @@ route.post(
   validateSchema(schema.Auth.login),
   login
 );
-route.get("/api/v-user/:token", accountVerification);
+route.post(
+  "/api/v-user",
+  validateSchema(schema.Auth.login),
+  accountVerification
+);
 route.delete("/api/auth/logout", verifyToken, logout);
 
 export default route;

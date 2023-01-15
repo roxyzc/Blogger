@@ -6,7 +6,7 @@ export const compare = async (v1: string, enc: string) => {
 };
 
 const algorithm = "aes-256-ctr";
-const secretKey = "vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3";
+const secretKey = process.env.SECRETKEY as string;
 
 export const encrypt = (text: any): any => {
   const iv = crypto.randomBytes(16);

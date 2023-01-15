@@ -8,7 +8,7 @@ export interface IUser {
   email: String;
   password: String;
   role: String;
-  valid: Boolean;
+  valid: String;
   image?: PopulatedDoc<Document<ObjectId> & IAvatarModel>;
   token?: PopulatedDoc<Document<ObjectId> & ITokenModel>;
   createdAt: Date;
@@ -39,7 +39,7 @@ const UserSchema: Schema = new Schema(
       max: 30,
     },
     role: {
-      enum: ["admin", "user"],
+      enum: ["admin", "user", "gmail"],
       type: String,
       required: true,
       default: "user",
@@ -49,9 +49,10 @@ const UserSchema: Schema = new Schema(
       ref: "Avatar",
     },
     valid: {
-      type: Boolean,
+      enum: ["active", "pending", "ban"],
+      type: String,
       required: true,
-      default: false,
+      default: "pending",
     },
     token: {
       type: Schema.Types.ObjectId,
@@ -61,7 +62,9 @@ const UserSchema: Schema = new Schema(
       type: Date,
       expires: 3600,
       default: function (this: IUserModel) {
-        return this.valid == true || this.role == "admin"
+        return this.valid == "active" ||
+          this.role == "admin" ||
+          this.valid == "ban"
           ? undefined
           : Date.now() + 1000 * 60 * 60;
       },

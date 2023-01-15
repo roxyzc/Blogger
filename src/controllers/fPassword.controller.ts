@@ -15,7 +15,7 @@ export const forgotThePassword = async (
   try {
     (await session).withTransaction(async (): Promise<any> => {
       const user = await User.findOne({ email }).select("email");
-      if (!user)
+      if (!user || user.valid === "pending")
         return res
           .status(404)
           .json({ success: false, message: "unregistered email" });

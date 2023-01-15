@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { logger } from "../libraries/Logger.library";
 import { findTokenInDatabase } from "../services/token.service";
+import { decrypt } from "../utils/hashing.util";
 
 export const verifyToken = async (
   req: Request,
@@ -78,10 +79,14 @@ export const checkExpired = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    const authHeader = req.headers["authorization"];
+    const authHeader = req.cookies["token"];
     if (!authHeader)
-      return res.status(401).json({ success: false, message: "Invalid token" });
-    const token = authHeader?.split(" ")[1];
+      return res
+        .status(401)
+        .json({ success: false, message: "token di cookies ndak ada" });
+    // const token = authHeader?.split(" ")[1];
+
+    const token = await decrypt(authHeader);
     jwt.verify(
       token as string,
       process.env.ACCESSTOKENSECRET as string,

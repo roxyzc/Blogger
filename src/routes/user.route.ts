@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  banUser,
   changeAvatar,
   changeProfile,
   findAllUserAndQuery,
@@ -15,6 +16,7 @@ import {
 } from "../middlewares/validationSchemas.middleware";
 import {
   verifyToken,
+  verifyTokenAdmin,
   verifyTokenAndAuthorization,
 } from "../middlewares/verifyToken.middleware";
 import { validateFile } from "../middlewares/validationFile.middleware";
@@ -36,18 +38,24 @@ route.post(
   vChangePassword
 );
 
-route.put(
-  "/api/user/:id",
-  verifyTokenAndAuthorization,
-  validateSchema(schema.User.profile),
-  changeProfile
-);
+route
+  .route("/api/user/:id")
+  .put(
+    verifyTokenAndAuthorization,
+    validateSchema(schema.User.profile),
+    changeProfile
+  )
+  .post(
+    verifyTokenAndAuthorization,
+    validateFile,
+    validateSchema(schema.User.changeAvatarUser),
+    changeAvatar
+  );
 
-route.post(
-  "/api/avatarUser/:id",
-  verifyTokenAndAuthorization,
-  validateFile,
-  validateSchema(schema.User.changeAvatarUser),
-  changeAvatar
+route.put(
+  "/api/banUser/:id",
+  verifyTokenAdmin,
+  validateSchema(schema.User.banUser),
+  banUser
 );
 export default route;

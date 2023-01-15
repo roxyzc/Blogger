@@ -86,7 +86,7 @@ export const schema = {
       }),
     }),
     verifyOTP: joi.object({
-      otp: joi.string().min(8).max(8).label("otp").required().messages({
+      otp: joi.string().min(6).max(6).label("otp").required().messages({
         "string.empty": `{{#label}} cannot be an empty field`,
         "string.min": `{{#label}} should be {#limit}`,
         "string.max": `{{#label}} should be {#limit}`,
@@ -128,6 +128,16 @@ export const schema = {
     }),
     changeAvatarUser: joi.object({
       image: joi.any().required().label("Image"),
+    }),
+    banUser: joi.object({
+      valid: joi
+        .string()
+        .required()
+        .valid("active", "pending", "ban")
+        .messages({
+          "string.empty": `{{#label}} cannot be an empty field`,
+          "any.required": `{{#label}} is a required field`,
+        }),
     }),
   },
   Blog: {
