@@ -14,6 +14,9 @@ declare global {
       USERNAME_ADMIN: string;
       PASSWORD_ADMIN: string;
       EMAIL_ADMIN: string;
+      CLIENTID: string;
+      CLIENTSECRET: string;
+      SECRET: string;
     }
   }
 }

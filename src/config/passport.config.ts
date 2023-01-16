@@ -10,19 +10,32 @@ export const configPassport = (passport: any) => {
         clientSecret: process.env.CLIENTSECRET as string,
         callbackURL: "http://localhost:8080/api/auth/callback",
       },
-      async (profile: any, _done: any) => {
-        const newUser = {
-          username: profile.displayName,
-          email: profile.email,
-          image: profile.photos[0].value,
-          password: profile.id,
-        };
+      async (
+        _accessToken: any,
+        _refreshToken: any,
+        profile: any,
+        done: any
+      ) => {
+        // const newUser = {
+        //   username: profile.displayName,
+        //   email: profile.emails[0].value,
+        //   image: profile.photos[0].value,
+        //   password: profile.id,
+        // };
 
         try {
-          console.log(newUser);
+          const user = await User.create({
+            id: profile.id,
+            username: profile.displayName,
+            email: profile.emails[0].value,
+            password: "apaAjaDulu",
+            valid: "active",
+            role: "gmail",
+          });
+          done(null, user);
         } catch (error: any) {
           logger.error(error.message);
-          throw new Error(error.message);
+          done(error.message, null);
         }
       }
     )
@@ -32,9 +45,12 @@ export const configPassport = (passport: any) => {
     done(null, user.id);
   });
 
-  passport.deserializeUser((id: String, done: any) => {
-    User.findById(id, (err: any, user: any) => {
-      done(err, user);
-    });
+  passport.deserializeUser(async (id: String, done: any) => {
+    try {
+      const user = await User.findById(id);
+      done(null, user);
+    } catch (error: any) {
+      done(error, null);
+    }
   });
 };
