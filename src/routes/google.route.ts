@@ -11,8 +11,8 @@ route.get(
 route.get(
   "/api/auth/callback",
   passport.authenticate("google", {
-    failureRedirect: "/api/404",
-    successRedirect: "/api/success",
+    failureRedirect: "/api/auth/fail",
+    successRedirect: "/api/auth/success",
   })
 );
 
