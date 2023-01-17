@@ -11,7 +11,6 @@ export interface IUser {
   valid: String;
   image?: PopulatedDoc<Document<ObjectId> & IAvatarModel>;
   token?: PopulatedDoc<Document<ObjectId> & ITokenModel>;
-  imageGoogle?: String;
   createdAt: Date;
   updatedAt: Date;
   expiredAt?: Date;
@@ -50,10 +49,6 @@ const UserSchema: Schema = new Schema(
     image: {
       type: Schema.Types.ObjectId,
       ref: "Avatar",
-    },
-    imageGoogle: {
-      type: String,
-      default: undefined,
     },
     valid: {
       enum: ["active", "pending", "ban"],

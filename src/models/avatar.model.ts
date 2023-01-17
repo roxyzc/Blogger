@@ -3,6 +3,7 @@ import { model, Schema, Document } from "mongoose";
 interface IAvatar {
   image?: String;
   cloudinary_id?: String;
+  imageGoogle?: String;
 }
 
 export interface IAvatarModel extends IAvatar, Document {}
@@ -16,6 +17,10 @@ const AvatarSchema: Schema = new Schema(
     cloudinary_id: {
       type: String,
       unique: true,
+    },
+    imageGoogle: {
+      type: String,
+      default: undefined,
     },
   },
   { versionKey: false }

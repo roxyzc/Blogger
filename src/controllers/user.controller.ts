@@ -13,13 +13,13 @@ export const findAllUserAndQuery = async (
     const users = username
       ? await User.find({
           username: { $regex: username },
-          role: "user",
+          role: { $ne: "admin" },
         })
           .limit(Number(limit))
           .sort({ createdAt: -1 })
           .select("username email valid")
       : await User.find({
-          role: "user",
+          role: { $ne: "user" },
         })
           .limit(Number(limit))
           .sort({ createdAt: -1 })
@@ -38,6 +38,10 @@ export const changeAvatar = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({ success: false, message: "User not found" });
+    if (user.role === "gmail")
+      return res
+        .status(403)
+        .json({ success: false, message: "You are not alowed to do that" });
     if (req.file === undefined) {
       const avatar = await Avatar.findByIdAndDelete(user.image);
       if (!avatar)
@@ -80,6 +84,32 @@ export const changeAvatar = async (req: Request, res: Response) => {
   } catch (error: any) {
     logger.error(error.message);
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteAvatar = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user)
+      return res.json(400).json({ success: false, message: "User not found" });
+    if (user.role === "gmail")
+      return res
+        .status(403)
+        .json({ success: false, message: "You are not alowed to do that" });
+    await user
+      .populate("image")
+      .then(() => cloud.uploader.destroy(user.image.cloudinary_id));
+    await Avatar.findByIdAndDelete(user.image.id);
+    user.$set("image", undefined).save();
+    return res
+      .status(200)
+      .json({ success: true, message: "delete photo profile successfully" });
+  } catch (error: any) {
+    logger.error(error.message);
+    res.status(500).json({ success: false, message: error });
   }
 };
 

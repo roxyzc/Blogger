@@ -3,6 +3,7 @@ import {
   banUser,
   changeAvatar,
   changeProfile,
+  deleteAvatar,
   findAllUserAndQuery,
 } from "../controllers/user.controller";
 import {
@@ -44,13 +45,17 @@ route
     verifyTokenAndAuthorization,
     validateSchema(schema.User.profile),
     changeProfile
-  )
+  );
+
+route
+  .route("/api/userImage/:id")
   .post(
     verifyTokenAndAuthorization,
     validateFile,
     validateSchema(schema.User.changeAvatarUser),
     changeAvatar
-  );
+  )
+  .delete(verifyTokenAndAuthorization, deleteAvatar);
 
 route.put(
   "/api/banUser/:id",

@@ -2,7 +2,9 @@ import { Strategy } from "passport-google-oauth20";
 import { logger } from "../libraries/Logger.library";
 import User from "../models/user.model";
 import Token from "../models/token.model";
+import Avatar from "../models/avatar.model";
 import { generateAccessToken } from "../utils/token.util";
+import cloud from "./cloudinary.config";
 
 export const configPassport = (passport: any) => {
   passport.use(
@@ -18,23 +20,27 @@ export const configPassport = (passport: any) => {
         profile: any,
         done: any
       ) => {
-        // const newUser = {
-        //   username: profile.displayName,
-        //   email: profile.emails[0].value,
-        //   image: profile.photos[0].value,
-        //   password: profile.id,
-        // };
-
         try {
           const findUser = await User.findOne({
             email: profile.emails[0].value as string,
-          });
+          }).populate("image");
+          if (findUser?.role !== "gmail" && !!findUser)
+            throw new Error("sapa lu?");
           if (!findUser) {
+            const result = await cloud.uploader.upload(
+              profile.photos[0].value as string
+            );
+            const avatar = await Avatar.create({
+              image: result.secure_url,
+              cloudinary_id: result.public_id,
+              imageGoogle: profile.photos[0].value as string,
+            });
+
             const user = await User.create({
               username: profile.displayName,
               email: profile.emails[0].value,
-              imageGoogle: profile.photos[0].value,
               valid: "active",
+              image: avatar.id,
               role: "gmail",
             });
 
@@ -60,6 +66,25 @@ export const configPassport = (passport: any) => {
               refreshToken,
             });
             await Object.assign(findUser, { token: createToken._id }).save();
+          }
+
+          if (
+            !(
+              findUser.image.imageGoogle === (profile.photos[0].value as string)
+            )
+          ) {
+            console.log("masuk kan bang ke 2?");
+            const findAvatar = await Avatar.findById(findUser.image.id);
+            if (!findAvatar) throw new Error("error lah pokoknya");
+            await cloud.uploader.destroy(findAvatar.cloudinary_id as string);
+            const result = await cloud.uploader.upload(
+              profile.photos[0].value as string
+            );
+            await Object.assign(findAvatar, {
+              image: result.secure_url,
+              cloudinary_id: result.public_id,
+              imageGoogle: profile.photos[0].value as string,
+            }).save();
           }
           return done(null, findUser);
         } catch (error: any) {
