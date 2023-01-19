@@ -23,6 +23,8 @@ route.get(
           if (error) return res.status(400).json({ success: false, error });
           req.login(user, (error) => {
             if (error) throw new Error(error);
+            req.session.passport = { login: true };
+            console.log(req.session);
             return res.status(200).json({ success: true, data: user });
           });
         }

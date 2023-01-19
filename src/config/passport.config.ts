@@ -4,7 +4,6 @@ import User from "../models/user.model";
 import Token from "../models/token.model";
 import Avatar from "../models/avatar.model";
 import { generateAccessToken } from "../utils/token.util";
-import cloud from "./cloudinary.config";
 
 export const configPassport = (passport: any) => {
   passport.use(
@@ -27,13 +26,8 @@ export const configPassport = (passport: any) => {
           if (findUser?.role !== "gmail" && !!findUser)
             throw new Error("sapa lu?");
           if (!findUser) {
-            const result = await cloud.uploader.upload(
-              profile.photos[0].value as string
-            );
             const avatar = await Avatar.create({
-              image: result.secure_url,
-              cloudinary_id: result.public_id,
-              imageGoogle: profile.photos[0].value as string,
+              image: profile.photos[0].value as string,
             });
 
             const user = await User.create({
@@ -73,17 +67,10 @@ export const configPassport = (passport: any) => {
               findUser.image.imageGoogle === (profile.photos[0].value as string)
             )
           ) {
-            console.log("masuk kan bang ke 2?");
             const findAvatar = await Avatar.findById(findUser.image.id);
             if (!findAvatar) throw new Error("error lah pokoknya");
-            await cloud.uploader.destroy(findAvatar.cloudinary_id as string);
-            const result = await cloud.uploader.upload(
-              profile.photos[0].value as string
-            );
             await Object.assign(findAvatar, {
-              image: result.secure_url,
-              cloudinary_id: result.public_id,
-              imageGoogle: profile.photos[0].value as string,
+              image: profile.photos[0].value as string,
             }).save();
           }
           return done(null, findUser);

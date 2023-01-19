@@ -5,7 +5,6 @@ import { logger } from "../libraries/Logger.library";
 import { sendEmail, sendInfoVerifyAccount } from "../utils/sendEmail.util";
 import { generateAccessToken } from "../utils/token.util";
 import { checkAdmin, createAdmin } from "../services/user.services";
-// import { encrypt } from "../utils/hashing.util";
 
 export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
@@ -89,13 +88,6 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     }
 
     const x = await (await user.save()).populate("token");
-    // const encToken = await encrypt(x.token.accessToken);
-    // res.cookie("token", encToken, {
-    //   maxAge: 15 * 60 * 1000,
-    //   sameSite: "none",
-    //   httpOnly: true,
-    // secure: true, // production
-    // });
     return res.status(200).json({
       success: true,
       data: { user: x },

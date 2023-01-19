@@ -15,7 +15,7 @@ import BlogRoute from "./routes/blog.route";
 import CommentRoute from "./routes/comment.route";
 import GoogleRoute from "./routes/google.route";
 import session from "express-session";
-// import MongoStore from "connect-mongo";
+import MongoStore from "connect-mongo";
 import "dotenv/config";
 
 const app: Application = express();
@@ -41,13 +41,15 @@ app.use(
     secret: process.env.SECRET as string,
     resave: false,
     saveUninitialized: false,
-    // store: MongoStore.create({
-    //   mongoUrl: process.env.MONGODB_URL,
-    // }),
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URL,
+      autoRemove: "native",
+      ttl: 9 * 60 * 60,
+    }),
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "development" ? false : true, // jika menggunakan http false jika https true
-      maxAge: 60 * 60 * 1000,
+      maxAge: 1440 * 60 * 1000,
       sameSite: "none",
     },
   })
